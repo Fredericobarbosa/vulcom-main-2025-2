@@ -226,7 +226,7 @@ controller.login = async function(req, res) {
 controller.me = function(req, res) {
   // Retorna as informações do usuário autenticado
   // HTTP 200: OK (implícito)
-  res.send({user})
+  res.send(req?.authUser)
 }
 
 controller.logout = function(req, res) {
