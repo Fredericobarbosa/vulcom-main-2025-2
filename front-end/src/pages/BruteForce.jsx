@@ -18,57 +18,82 @@ export default function BruteForce() {
  }, [logs])
 
 
- function tryPassword(password) {
+  function tryPassword(password) {
    return myfetch.post('/users/login', {
      username: 'admin',
      password
    })
    .then(() => 'OK')
    .catch(error => error.message)
- }
+  }
 
 
- async function handleStartClick() {
-   setIsRunning(true)
-   stopRef.current = false
-   setLogs([])
+  async function handleStartClick() {
+    setIsRunning(true)
+    stopRef.current = false
+    setLogs([])
 
 
-   const batchSize = concurrency
-   let found = false
+    const batchSize = concurrency
+    let found = false
+    let consecutive429 = 0
 
 
-   for (let i = 0; i < wordlist.length && !found; i += batchSize) {
-     if (stopRef.current) break
+    for (let i = 0; i < wordlist.length && !found && !stopRef.current; i += batchSize) {
+      if (stopRef.current) break
 
 
-     const batch = wordlist.slice(i, i + batchSize)
-     const promises = batch.map((password, index) =>
-       tryPassword(password)
-         .then(result => {
-           const attemptNumber = i + index
-           const newLog = result === 'OK'
-             ? `SENHA ENCONTRADA, tentativa nº ${attemptNumber}: ${password}`
-             : `Tentativa nº ${attemptNumber} (${password}) => ${result}`
+      const batch = wordlist.slice(i, i + batchSize)
+      const promises = batch.map(password =>
+        myfetch.post('/users/login', { username: 'admin', password })
+          .then(() => ({ status: 200, result: 'OK', password }))
+          .catch(error => {
+            const status = error?.response?.status ?? error?.status ?? null
+            return { status, result: error?.message ?? String(error), password }
+          })
+      )
 
 
-           setLogs(prevLogs => [newLog, ...prevLogs])
-           return result
-         })
-     )
+      const results = await Promise.all(promises)
 
 
-     const results = await Promise.all(promises)
-     found = results.some(result => result === 'OK')
+      for (let idx = 0; idx < results.length; idx++) {
+        const res = results[idx]
+        const attemptNumber = i + idx
 
 
-     // Pequena pausa para evitar bloqueio da UI
-     await new Promise(resolve => requestAnimationFrame(resolve))
-   }
+        if (res.result === 'OK') {
+          const newLog = `SENHA ENCONTRADA, tentativa nº ${attemptNumber}: ${res.password}`
+          setLogs(prevLogs => [newLog, ...prevLogs])
+          found = true
+          break
+        } else {
+          const statusText = res.status ? ` (HTTP ${res.status})` : ''
+          const newLog = `Tentativa nº ${attemptNumber} (${res.password}) => ${res.result}${statusText}`
+          setLogs(prevLogs => [newLog, ...prevLogs])
 
 
-   setIsRunning(false)
- }
+          if (res.status === 429) {
+            consecutive429++
+            if (consecutive429 >= 5) {
+              setLogs(prev => ['Recebido HTTP 429 cinco vezes consecutivas — interrompendo.', ...prev])
+              stopRef.current = true
+              break
+            }
+          } else {
+            consecutive429 = 0
+          }
+        }
+      }
+
+
+      // Pequena pausa para evitar bloqueio da UI
+      await new Promise(resolve => requestAnimationFrame(resolve))
+    }
+
+
+    setIsRunning(false)
+  }
 
 
  function handleStopClick() {
