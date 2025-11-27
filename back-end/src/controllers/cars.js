@@ -2,6 +2,17 @@ import prisma from "../database/client.js";
 import Car from "../models/Car.js";
 import { ZodError } from "zod";
 
+
+/*  
+  Vulnerabilidade API1:2023 - Falha de autenticação a nível de objeto 
+  Está vunerabilidade poderia ter sido evitada no código fazendo:
+  1- Carregamento do carro pelo ID, caso não existir, retornar 404.
+  2- Permitindo o acesso só se for admin ou dono (created/updated_user_id), senão 403.
+  3- Restringindo a criação a perfis autorizados e registrar quem criou/atualizou.
+  4 -Centralizar a checagem em um helper e validar parâmetros (include) com whitelist.
+  Logar tentativas negadas, aplicar rate limiting e testar usuários distintos (A não acessa B).
+*/
+
 const controller = {}; // Objeto vazio
 
 controller.create = async function (req, res) {

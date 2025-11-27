@@ -5,6 +5,14 @@ import express, { json, urlencoded } from 'express'
 import cookieParser from 'cookie-parser'
 import logger from 'morgan'
 
+/*
+  Vulnerabilidade API8:2023 - Má Configuração de Segurança
+  Esta vunerabilidade foi parcialmente mitigada com CORS configurado (origin restrito), rate limiting ativo, dotenv para variáveis sensíveis.
+  1- Poderia haver melhora adicionando helmet (headers de segurança HTTP), desabilitamento do stack traces em produção (NODE_ENV=production),
+  2- Validação que TOKEN_SECRET seja forte, HTTPS obrigatório, logs sem dados sensíveis.
+  3- Revisão do bypassRoutes (auth.js) para não expor endpoints desnecessários.
+*/
+
 const app = express()
 
 import cors from 'cors'

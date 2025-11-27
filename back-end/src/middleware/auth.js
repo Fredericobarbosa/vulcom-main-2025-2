@@ -1,4 +1,12 @@
 /*
+  Vulnerabilidade API8:2023 - Má Configuração de Segurança
+  Esta vunerabilidade foi parcialmente mitigada com CORS configurado (origin restrito), rate limiting ativo, dotenv para variáveis sensíveis.
+  1- Poderia haver melhora adicionando helmet (headers de segurança HTTP), desabilitamento do stack traces em produção (NODE_ENV=production),
+  validação que TOKEN_SECRET seja forte, HTTPS obrigatório, logs sem dados sensíveis.
+  2- Revisão do bypassRoutes (auth.js) para não expor endpoints desnecessários.
+*/
+
+/*
   Este middleware intercepta todas as rotas e verifica
   se um token de autorização foi enviado junto com a
   requisição

@@ -7,6 +7,14 @@
  * @license GL2PS
  */
 
+/*
+  Vulnerabilidade API10:2023 - Consumo Inseguro de APIs:
+  Esta vunerabilidade foi parcialmente mitigada com baseUrl vem de variável de ambiente (.env.local), credentials:'include' para cookies.
+  1- Poderia haver melhora no timeout em requisições, validação de certificado SSL/TLS, retry limitado com backoff exponencial,
+  sanitização de dados recebidos (validar schema de resposta), tratar respostas inesperadas (não-JSON, tamanho excessivo).
+  2- Adicionando headers de segurança (CSP, X-Content-Type-Options).
+ */
+
 class HttpError extends Error {
   constructor(status, message) {
     super(message)

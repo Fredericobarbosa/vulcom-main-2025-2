@@ -2,6 +2,17 @@ import prisma from '../database/client.js'
 import Customer from '../models/Customer.js'
 import { ZodError } from 'zod'
 
+
+/*
+  Vulnerabilidade API1:2023 - Falha de autenticação a nível de objeto
+  Esta vulnerabilidade poderia ter sido evitada fazendo:
+  1- Carregamento do cliente pelo ID, caso não existir, retornar 404.
+  2- Permitindo o acesso só se for admin ou proprietário (owner_user_id, caso exista), senão 403.
+  3- Centralizando a checagem em helper (authorizeCustomerAccess) e validar includes com whitelist.
+  4- Logando tentativas negadas (403) e aplicar rate limiting.
+  5- Testando que usuário A não acessa/altera/exclui clientes de B.
+*/
+
 const controller = {}     // Objeto vazio
 
 controller.create = async function(req, res) {

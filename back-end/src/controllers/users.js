@@ -2,6 +2,24 @@ import prisma from '../database/client.js'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 
+
+/*
+  Vulnerabilidade API1:2023 - Falha de autenticação a nível de objeto 
+  Esta vulnerabilidade poderia ter sido evitada fazendo:
+  1- Carregamento do usuário pelo ID, caso não existir, retornar 404.
+  2- Permitindo acesso só se for admin ou o próprio usuário,  senão 403.
+  3- Mantendo as operações sensíveis (create, update, delete, retrieveAll) restritas a admin.
+  4- Validando que usuários comuns só acessem/atualizem seus próprios dados (retrieveOne já implementa).
+  5- Auditando as tentativas negadas (403) e testar que usuário A não acessa/altera dados de B.
+*/
+
+
+/*
+  Vulnerabilidade API8:2023 - Má Configuração de Segurança (login):
+  Esta vunerabilidade foi parcialmente mitigada com o uso do bcrypt.compare, httpOnly nos cookies, TOKEN_SECRET do .env, expira em 24h.
+  1- Poderia haver melhora garantindo TOKEN_SECRET forte, o secure:true só em HTTPS (verificar NODE_ENV),
+  o rate limiting específico no login, log de tentativas falhadas.
+*/
 const controller = {}     // Objeto vazio
 
 controller.create = async function(req, res) {

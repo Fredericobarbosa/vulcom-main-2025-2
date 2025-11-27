@@ -19,6 +19,13 @@ import useWaiting from "../../ui/useWaiting";
 import { ZodError } from "zod";
 import Car from "../../models/Car";
 
+/*
+  Vulnerabilidade API10:2023 - Consumo Inseguro de APIs:
+  Esta vunerabilidade foi parcialmente mitigada com validação dos dados no front (Car.safeParse) antes de enviar, trata erros 422/500.
+  1- Poderia haver melhora na validação do schema da resposta do servidor (validar que retorno é esperado), do timeout na requisição,
+  sanitizando os dados recebidos de /customers e /cars.
+*/
+
 export default function CarForm() {
   /*
     Por padrão, todos os campos do nosso formulário terão como
